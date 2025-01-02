@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 622 Foundation</title>
+    <style>
+        :root {
+            --garnet: #8B1E3F;
+            --old-gold: #CFB53B;
+            --light-gold: #F4E9CD;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--garnet);
+            padding: 1rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--old-gold);
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--light-gold);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            color: var(--old-gold);
+        }
+
+        .nav-links .sign-in-btn {
+            background-color: var(--old-gold);
+            color: var(--garnet);
+        }
+
+        .nav-links .sign-in-btn:hover {
+            background-color: #DFC550;
+            color: var(--garnet);
+        }
+
+        .hero {
+            background-color: var(--garnet);
+            color: var(--light-gold);
+            padding: 4rem 1rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--old-gold);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+            background-color: white;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .chapter-image {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .chapter-image img {
+            max-width: 60%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .feature-card {
+            padding: 2rem;
+            background-color: var(--light-gold);
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--garnet);
+        }
+
+        footer {
+            background-color: var(--garnet);
+            color: var(--light-gold);
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">622 Foundation</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="signin.html" class="sign-in-btn">Sign In</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>The 622 Foundation</h1>
+        <p>Managed under the guidance of the Alumni Advisory Board (AAB), ‘The 622 Foundation’ will support
+            the Active Chapter - Iota Omega – of Pi Kappa Alpha by harnessing the power of the Alumni Network.</p>
+    </section>
+
+    <main>
+        <div class="chapter-image">
+            <img src="pikechapter.JPG" alt="Pike Chapter" />
+        </div>
+        <div class="features">
+            <div class="feature-card">
+                <h3>Our Mission</h3>
+                <p>To establish the foundational elements, the core essentials, to foster core Pike values
+                    and enable the best Scholars, Leaders, Athletes and Gentlemen.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Our Impact</h3>
+                <p>Provide mentorship, guidance and financial support in order to help young men
+                    develop and grow through their undergrad experience.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Get Involved</h3>
+                <p>Sign up as an alumni or active to join us in making a difference. Volunteer, donate, or participate in our programs.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 The 622 Foundation. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
