@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - The 622 Foundation</title>
+    <title>Login - The 622 Foundation</title>
     <style>
         :root {
             --garnet: #8B1E3F;
@@ -66,12 +66,12 @@
             color: var(--old-gold);
         }
 
-        .nav-links .sign-in-btn {
+        .nav-links .login-btn {
             background-color: var(--old-gold);
             color: var(--garnet);
         }
 
-        .nav-links .sign-in-btn:hover {
+        .nav-links .login-btn:hover {
             background-color: #DFC550;
             color: var(--garnet);
         }
@@ -85,7 +85,7 @@
             background-color: #f5f5f5;
         }
 
-        .signin-container {
+        .login-container {
             background-color: white;
             padding: 2rem;
             border-radius: 8px;
@@ -94,7 +94,7 @@
             max-width: 400px;
         }
 
-        .signin-container h1 {
+        .login-container h1 {
             color: var(--garnet);
             text-align: center;
             margin-bottom: 2rem;
@@ -148,6 +148,13 @@
             text-align: center;
         }
 
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .nav-links {
                 gap: 1rem;
@@ -163,15 +170,15 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About</a></li>
-                <li><a href="signin.html" class="sign-in-btn">Sign In</a></li>
+                <li><a href="login.html" class="login-btn">Login</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <div class="signin-container">
-            <h1>Sign In</h1>
-            <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="login-container">
+            <h1>Login</h1>
+            <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" required>
@@ -179,34 +186,12 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required>
+                    <p class="error-message" id="error-message"></p>
                 </div>
-                <button type="submit">Sign In</button>
+                <button type="submit">Login</button>
             </form>
-
-            <script>
-                function handleLogin(event) {
-                    event.preventDefault();
-                    
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-                    
-                    // Get users from localStorage
-                    const users = JSON.parse(localStorage.getItem('users') || '[]');
-                    
-                    // Find matching user
-                    const user = users.find(u => u.email === email && u.password === password);
-                    
-                    if (user) {
-                        // Save current user
-                        localStorage.setItem('currentUser', JSON.stringify(user));
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        alert('Invalid email or password');
-                    }
-                }
-            </script>
             <div style="text-align: center; margin-top: 1rem;">
-                <a href="signin.html" style="color: var(--garnet); text-decoration: none;">Need an account? Sign up</a>
+                <a href="signup.html" style="color: var(--garnet); text-decoration: none;">Need an account? Sign up</a>
             </div>
         </div>
     </main>
@@ -216,5 +201,57 @@
             <p>&copy; 2024 The 622 Foundation. All rights reserved.</p>
         </div>
     </footer>
+
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6nSNnM0Y7r-i-7Y11b6E04hE51fc2rSw",
+            authDomain: "foundation-259ea.firebaseapp.com",
+            projectId: "foundation-259ea",
+            storageBucket: "foundation-259ea.firebasestorage.app",
+            messagingSenderId: "359815211839",
+            appId: "1:359815211839:web:73981cf6cdb258e380c18a",
+            measurementId: "G-EKX2GYLBBJ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Handle login form submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            try {
+                errorMessage.style.display = 'none';
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // On successful login, redirect to dashboard
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Check authentication state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // If user is already logged in, redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
 </body>
 </html>
