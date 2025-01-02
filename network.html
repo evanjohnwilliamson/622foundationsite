@@ -193,6 +193,13 @@
             max-height: 500px;
             overflow-y: auto;
         }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -268,20 +275,7 @@
 
                 <div class="search-results">
                     <div class="member-grid">
-                        <!-- Sample member cards - In real application, these would be populated dynamically -->
-                        <div class="member-card">
-                            <div class="member-name">John Smith</div>
-                            <p>Alumni</p>
-                            <p>BS Computer Science</p>
-                            <p>Software Engineer at Tech Corp</p>
-                        </div>
-                        <div class="member-card">
-                            <div class="member-name">Mike Johnson</div>
-                            <p>Active</p>
-                            <p>Finance Major</p>
-                            <p>Intern at Investment Bank</p>
-                        </div>
-                        <!-- More member cards would be added dynamically -->
+                        <!-- Member cards will be populated dynamically -->
                     </div>
                 </div>
             </div>
@@ -292,81 +286,143 @@
         <p>&copy; 2024 The 622 Foundation. All rights reserved.</p>
     </footer>
 
-    <script>
-        // Load current user profile on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser) {
-                document.getElementById('degree').value = currentUser.degree || '';
-                document.getElementById('age').value = currentUser.age || '';
-                document.getElementById('phone').value = currentUser.phone || '';
-                document.getElementById('company').value = currentUser.company || '';
-                document.getElementById('work-area').value = currentUser.workArea || '';
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getAuth,
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { 
+            getFirestore,
+            doc,
+            getDoc,
+            updateDoc,
+            collection,
+            getDocs,
+            query,
+            where 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6nSNnM0Y7r-i-7Y11b6E04hE51fc2rSw",
+            authDomain: "foundation-259ea.firebaseapp.com",
+            projectId: "foundation-259ea",
+            storageBucket: "foundation-259ea.firebasestorage.app",
+            messagingSenderId: "359815211839",
+            appId: "1:359815211839:web:73981cf6cdb258e380c18a",
+            measurementId: "G-EKX2GYLBBJ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication and load data
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Load user profile
+                await loadUserProfile(user.uid);
+                // Load member directory
+                await updateMemberDirectory();
+            } else {
+                // Redirect to login if not authenticated
+                window.location.href = 'login.html';
             }
-            updateMemberDirectory();
         });
 
-        // Handle profile updates
-        document.getElementById('profile-form').addEventListener('submit', function(e) {
+        // Load user profile
+        async function loadUserProfile(userId) {
+            try {
+                const userDoc = await getDoc(doc(db, 'users', userId));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    document.getElementById('degree').value = userData.degree || '';
+                    document.getElementById('age').value = userData.age || '';
+                    document.getElementById('phone').value = userData.phone || '';
+                    document.getElementById('company').value = userData.company || '';
+                    document.getElementById('work-area').value = userData.workArea || '';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Error loading profile. Please try again.');
+            }
+        }
+
+        // Handle profile form submission
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const user = auth.currentUser;
             
-            // Get current user
-            let currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            let users = JSON.parse(localStorage.getItem('users'));
-            
-            // Update profile information
-            const updates = {
-                degree: document.getElementById('degree').value,
-                age: document.getElementById('age').value,
-                phone: document.getElementById('phone').value,
-                company: document.getElementById('company').value,
-                workArea: document.getElementById('work-area').value
-            };
-            
-            // Update current user
-            Object.assign(currentUser, updates);
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Update user in users array
-            const userIndex = users.findIndex(u => u.email === currentUser.email);
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
-                localStorage.setItem('users', JSON.stringify(users));
+            if (!user) {
+                alert('Please login to update your profile');
+                return;
             }
-            
-            alert('Profile updated successfully!');
-            updateMemberDirectory();
+
+            try {
+                const updates = {
+                    degree: document.getElementById('degree').value,
+                    age: document.getElementById('age').value,
+                    phone: document.getElementById('phone').value,
+                    company: document.getElementById('company').value,
+                    workArea: document.getElementById('work-area').value
+                };
+
+                await updateDoc(doc(db, 'users', user.uid), updates);
+                alert('Profile updated successfully!');
+                await updateMemberDirectory();
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile. Please try again.');
+            }
         });
 
-        // Directory search and filter functionality
-        function updateMemberDirectory() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const statusFilter = document.getElementById('filter-status').value;
-            const workFilter = document.getElementById('filter-work').value;
-            const searchTerm = document.getElementById('search').value.toLowerCase();
-            
-            // Filter users
-            let filteredUsers = users.filter(user => {
-                const matchesStatus = !statusFilter || user.userType === statusFilter;
-                const matchesWork = !workFilter || user.workArea === workFilter;
-                const matchesSearch = !searchTerm || 
-                    user.name.toLowerCase().includes(searchTerm) ||
-                    (user.company && user.company.toLowerCase().includes(searchTerm));
+        // Update member directory
+        async function updateMemberDirectory() {
+            try {
+                const statusFilter = document.getElementById('filter-status').value;
+                const workFilter = document.getElementById('filter-work').value;
+                const searchTerm = document.getElementById('search').value.toLowerCase();
+
+                // Get all users
+                let usersQuery = collection(db, 'users');
+                if (statusFilter) {
+                    usersQuery = query(usersQuery, where('userType', '==', statusFilter));
+                }
+
+                const querySnapshot = await getDocs(usersQuery);
+                let users = [];
                 
-                return matchesStatus && matchesWork && matchesSearch;
-            });
-            
-            // Update directory display
-            const memberGrid = document.querySelector('.member-grid');
-            memberGrid.innerHTML = filteredUsers.map(user => `
-                <div class="member-card">
-                    <div class="member-name">${user.name}</div>
-                    <p>${user.userType}</p>
-                    ${user.degree ? `<p>${user.degree}</p>` : ''}
-                    ${user.company ? `<p>${user.company}</p>` : ''}
-                    ${user.workArea ? `<p>${user.workArea}</p>` : ''}
-                </div>
-            `).join('');
+                querySnapshot.forEach((doc) => {
+                    const userData = doc.data();
+                    // Apply work filter and search filter on client side
+                    const matchesWork = !workFilter || userData.workArea === workFilter;
+                    const matchesSearch = !searchTerm || 
+                        (userData.name && userData.name.toLowerCase().includes(searchTerm)) ||
+                        (userData.company && userData.company.toLowerCase().includes(searchTerm));
+
+                    if (matchesWork && matchesSearch) {
+                        users.push(userData);
+                    }
+                });
+
+                // Update directory display
+                const memberGrid = document.querySelector('.member-grid');
+                memberGrid.innerHTML = users.map(user => `
+                    <div class="member-card">
+                        <div class="member-name">${user.name || 'Anonymous'}</div>
+                        <p>${user.userType || 'Member'}</p>
+                        ${user.degree ? `<p>${user.degree}</p>` : ''}
+                        ${user.company ? `<p>${user.company}</p>` : ''}
+                        ${user.workArea ? `<p>${user.workArea}</p>` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error updating directory:', error);
+                alert('Error loading member directory. Please try again.');
+            }
         }
 
         // Add event listeners for filters
