@@ -241,6 +241,13 @@
                         <label for="work-area">Area of Work</label>
                         <input type="text" id="work-area" name="work-area" placeholder="e.g., Software Development">
                     </div>
+                    <div class="form-group">
+                        <label for="user-type">Status</label>
+                        <select id="user-type" name="user-type">
+                            <option value="active">Active</option>
+                            <option value="alumni">Alumni</option>
+                        </select>
+                    </div>
                     <button type="submit">Update Profile</button>
                 </form>
             </div>
@@ -348,6 +355,7 @@
                     document.getElementById('phone').value = userData.phone || '';
                     document.getElementById('company').value = userData.company || '';
                     document.getElementById('work-area').value = userData.workArea || '';
+                    document.getElementById('user-type').value = userData.userType || 'active';
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
