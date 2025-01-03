@@ -387,9 +387,9 @@
                     phone: document.getElementById('phone').value,
                     company: document.getElementById('company').value,
                     workArea: document.getElementById('work-area').value,
-                    name: user.displayName || 'Anonymous',
+                    name: docSnap.exists() ? docSnap.data().name || user.displayName || 'Anonymous' : user.displayName || 'Anonymous',
                     email: user.email,
-                    userType: 'active',
+                    userType: document.getElementById('user-type').value,
                     updatedAt: new Date().toISOString(),
                     createdAt: docSnap.exists() ? docSnap.data().createdAt : new Date().toISOString()
                 };
