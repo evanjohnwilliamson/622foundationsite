@@ -297,11 +297,13 @@
             getFirestore,
             doc,
             getDoc,
+            setDoc,
             updateDoc,
             collection,
             getDocs,
             query,
-            where 
+            where,
+            setDoc 
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Your Firebase configuration
@@ -362,15 +364,28 @@
             }
 
             try {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                
                 const updates = {
                     degree: document.getElementById('degree').value,
                     age: document.getElementById('age').value,
                     phone: document.getElementById('phone').value,
                     company: document.getElementById('company').value,
-                    workArea: document.getElementById('work-area').value
+                    workArea: document.getElementById('work-area').value,
+                    // Add these fields if they don't exist
+                    name: user.displayName || 'Anonymous',
+                    email: user.email,
+                    userType: 'active' // or whatever default status you want
                 };
 
-                await updateDoc(doc(db, 'users', user.uid), updates);
+                if (userDoc.exists()) {
+                    await updateDoc(userDocRef, updates);
+                } else {
+                    // If document doesn't exist, create it
+                    await setDoc(userDocRef, updates);
+                }
+
                 alert('Profile updated successfully!');
                 await updateMemberDirectory();
             } catch (error) {
