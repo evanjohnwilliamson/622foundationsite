@@ -325,12 +325,13 @@
         // Check authentication and load data
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                console.log('User authenticated:', user.uid); // Debug log
                 // Load user profile
                 await loadUserProfile(user.uid);
                 // Load member directory
                 await updateMemberDirectory();
             } else {
-                // Redirect to login if not authenticated
+                console.log('No user authenticated'); // Debug log
                 window.location.href = 'login.html';
             }
         });
@@ -338,7 +339,9 @@
         // Load user profile
         async function loadUserProfile(userId) {
             try {
+                console.log('Loading profile for user:', userId); // Debug log
                 const userDoc = await getDoc(doc(db, 'users', userId));
+                console.log('User document exists:', userDoc.exists()); // Debug log
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     document.getElementById('degree').value = userData.degree || '';
@@ -359,13 +362,17 @@
             const user = auth.currentUser;
             
             if (!user) {
+                console.log('No user found during form submission');
                 alert('Please login to update your profile');
                 return;
             }
 
             try {
+                console.log('Attempting to update profile for user:', user.uid);
                 const userDocRef = doc(db, 'users', user.uid);
-                const userDoc = await getDoc(userDocRef);
+                
+                // First check if the document exists
+                const docSnap = await getDoc(userDocRef);
                 
                 const updates = {
                     degree: document.getElementById('degree').value,
@@ -373,24 +380,29 @@
                     phone: document.getElementById('phone').value,
                     company: document.getElementById('company').value,
                     workArea: document.getElementById('work-area').value,
-                    // Add these fields if they don't exist
                     name: user.displayName || 'Anonymous',
                     email: user.email,
-                    userType: 'active' // or whatever default status you want
+                    userType: 'active',
+                    updatedAt: new Date().toISOString(),
+                    createdAt: docSnap.exists() ? docSnap.data().createdAt : new Date().toISOString()
                 };
 
-                if (userDoc.exists()) {
+                if (docSnap.exists()) {
+                    console.log('Updating existing document');
                     await updateDoc(userDocRef, updates);
                 } else {
-                    // If document doesn't exist, create it
+                    console.log('Creating new document');
                     await setDoc(userDocRef, updates);
                 }
 
+                console.log('Profile updated successfully');
                 alert('Profile updated successfully!');
                 await updateMemberDirectory();
             } catch (error) {
-                console.error('Error updating profile:', error);
-                alert('Error updating profile. Please try again.');
+                console.error('Detailed error:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                alert(`Error updating profile: ${error.message}`);
             }
         });
 
